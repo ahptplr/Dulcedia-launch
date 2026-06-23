@@ -152,7 +152,7 @@
 
         document.getElementById('bar').style.width = percentage + '%';
         // സ്ക്രീനിൽ ശതമാനവും ഒപ്പം നിലവിലെ ക്ലിക്കുകളും കാണിക്കുന്നു
-        document.getElementById('percentage-label').innerText = `Preparing for Launch... ${percentage}% (${clicks}/${targetClicks} Taps)`;
+        document.getElementById('percentage-label').innerText = `Preparing for Launch... ${percentage}%`;
 
         if(clicks >= targetClicks) {
             launchStarted = true;
