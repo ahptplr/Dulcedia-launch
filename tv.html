@@ -16,12 +16,13 @@
             align-items: center; 
             height: 100vh;
             text-align: center;
+            position: relative;
         }
         .container { width: 90%; max-width: 900px; position: relative; z-index: 10; }
         .subtitle { color: #f59e0b; letter-spacing: 3px; font-weight: bold; font-size: 24px; margin-bottom: 10px; }
         .title { font-size: 72px; font-weight: 800; margin: 0 0 40px 0; letter-spacing: 2px; }
         
-        /* പ്രോഗ്രസ് ബാർ സ്റ്റൈൽ */
+        /* പ്രോഗ്രസ് ബാർ */
         .progress-container { 
             width: 100%; height: 35px; background: rgba(51, 65, 85, 0.5); 
             border-radius: 20px; overflow: hidden; margin-bottom: 25px;
@@ -33,38 +34,18 @@
             transition: width 0.4s ease; border-radius: 20px;
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
         }
-        .percentage-text { font-size: 32px; color: #38bdf8; font-weight: bold; margin-top: 15px; }
+        .percentage-text { font-size: 32px; color: #38bdf8; font-weight: bold; margin-top: 15px; transition: all 0.3s; }
 
-        /* രണ്ട് വരികളുള്ള പുതിയ പോപ്പപ്പ് ബാഡ്ജ് സ്റ്റൈൽ */
+        /* ബാഡ്ജ് സ്റ്റൈൽ */
         .badge {
-            position: absolute; 
-            padding: 15px 35px; 
-            border-radius: 25px; /* രണ്ട് വരികൾക്ക് അനുയോജ്യമായ ബോക്സ് ഷേപ്പ് */
-            background: linear-gradient(135deg, #f97316, #ea580c);
-            color: white; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-            animation: floatUp 3.5s forwards ease-out; 
-            opacity: 0; 
-            pointer-events: none;
-            border: 2px solid rgba(255,255,255,0.2);
-            text-align: center;
-            min-width: 250px;
+            position: absolute; padding: 15px 35px; border-radius: 25px;
+            background: linear-gradient(135deg, #f97316, #ea580c); color: white; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5); animation: floatUp 3.5s forwards ease-out; 
+            opacity: 0; pointer-events: none; border: 2px solid rgba(255,255,255,0.2);
+            text-align: center; min-width: 250px;
         }
-        /* ആദ്യ വരിയിലെ പേര് (വലുതും ബോൾഡും) */
-        .badge-name {
-            font-size: 34px;
-            font-weight: 800;
-            color: #ffffff;
-            margin-bottom: 4px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        /* രണ്ടാമത്തെ വരിയിലെ മെസ്സേജ് (ചെറിയ അക്ഷരത്തിൽ മഞ്ഞ നിറത്തിൽ) */
-        .badge-msg {
-            font-size: 22px;
-            font-weight: 600;
-            color: #fef08a; /* ആകർഷകമായ ലൈറ്റ് ഗോൾഡ്/മഞ്ഞ ഷേഡ് */
-            letter-spacing: 0.5px;
-        }
+        .badge-name { font-size: 34px; font-weight: 800; color: #ffffff; margin-bottom: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .badge-msg { font-size: 22px; font-weight: 600; color: #fef08a; letter-spacing: 0.5px; }
 
         @keyframes floatUp {
             0% { transform: translateY(100vh) scale(0.6); opacity: 0; }
@@ -75,17 +56,45 @@
         
         #launch-screen { display: block; }
         #result-screen { display: none; }
-        .poster-tv { max-height: 85vh; max-width: 100%; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+        
+        /* 💥 സ്ക്രീൻ പൊട്ടി വരുന്ന പോസ്റ്റർ ആനിമേഷൻ (Burst/Pop Intro) */
+        .poster-tv { 
+            max-height: 85vh; 
+            max-width: 100%; 
+            border-radius: 20px; 
+            box-shadow: 0 0 60px rgba(59, 130, 246, 0.6);
+            animation: burstIn 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        
+        @keyframes burstIn {
+            0% { transform: scale(0.2); opacity: 0; filter: brightness(3) blur(10px); }
+            45% { transform: scale(1.1); opacity: 1; filter: brightness(1.8) blur(2px); }
+            70% { transform: scale(0.97); filter: brightness(1.2); }
+            100% { transform: scale(1); opacity: 1; filter: brightness(1); }
+        }
+
+        /* സ്ക്രീൻ മാറുമ്പോൾ ഉണ്ടാകുന്ന വൈറ്റ് ഫ്ലാഷ് എഫക്ട് */
+        .flash-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: white; z-index: 100; opacity: 0; pointer-events: none;
+        }
+        @keyframes flashEffect {
+            0% { opacity: 0; }
+            20% { opacity: 1; }
+            100% { opacity: 0; }
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
 
+<!-- വൈറ്റ് ഫ്ലാഷ് ലെയർ -->
+<div class="flash-overlay" id="flash"></div>
+
 <div class="container" id="launch-screen">
     <div class="subtitle">SIDRA ACADEMY</div>
     <div class="title">DULCE DIA 2026</div>
-    
     <div class="progress-container">
         <div class="progress-bar" id="bar"></div>
     </div>
@@ -102,9 +111,14 @@
     const db = firebase.database();
 
     const targetClicks = 200;
+    let launchStarted = false; // രണ്ട് തവണ ട്രിഗർ ആകാതിരിക്കാൻ
 
-    // 1. പ്രോഗ്രസ് ബാറും ശതമാനവും മാത്രം കാണിക്കുന്നു (ടാപ്സിന്റെ എണ്ണം ഒഴിവാക്കി)
+    // പേജ് ലോഡ് ചെയ്യുമ്പോൾ പഴയ റീവീൽ സ്റ്റാറ്റസ് ഉണ്ടെങ്കിൽ അത് കളയുന്നു (Reset)
+    db.ref('mobile_reveal').set(false);
+
     db.ref('click_count').on('value', (snapshot) => {
+        if(launchStarted) return; // ലോഞ്ചിങ് പ്രോസസ്സ് തുടങ്ങിയാൽ പിന്നെ ഈ കോഡ് വർക്ക് ചെയ്യില്ല
+
         const clicks = snapshot.val() || 0;
         let percentage = Math.floor((clicks / targetClicks) * 100);
         if(percentage > 100) percentage = 100;
@@ -112,17 +126,36 @@
         document.getElementById('bar').style.width = percentage + '%';
         document.getElementById('percentage-label').innerText = `Preparing for Launch... ${percentage}%`;
 
-        // 100% ആയാൽ പോസ്റ്റർ സ്ക്രീൻ ലോഡ് ചെയ്യും
+        // 100% ആകുമ്പോൾ ഉള്ള മാസ്സ് എൻട്രി ലോജിക്
         if(clicks >= targetClicks) {
-            document.getElementById('launch-screen').style.display = 'none';
-            document.getElementById('result-screen').style.display = 'block';
+            launchStarted = true;
+            
+            // 1. ഉടനെ പോസ്റ്റർ കാണിക്കാതെ ടെക്സ്റ്റ് മാറ്റുന്നു
+            document.getElementById('percentage-label').innerText = `Launching... 🚀`;
+            document.getElementById('percentage-label').style.color = '#f43f5e';
+            document.getElementById('percentage-label').style.fontSize = '40px';
+
+            // 2. കൃത്യം 2.5 സെക്കൻഡിന് ശേഷം ടിവിയിൽ വലിയ ആനിമേഷനോടെ പോസ്റ്റർ വരുന്നു
+            setTimeout(() => {
+                // വൈറ്റ് ഫ്ലാഷ് എഫക്ട് നൽകുന്നു
+                document.getElementById('flash').style.animation = 'flashEffect 0.8s ease-out';
+                
+                // സ്ക്രീൻ മാറ്റുന്നു
+                document.getElementById('launch-screen').style.display = 'none';
+                document.getElementById('result-screen').style.display = 'block';
+
+                // 3. ടിവിയിൽ പോസ്റ്റർ വന്ന് 2 സെക്കൻഡ് കഴിഞ്ഞ് (ടിവിയിലെ ആനിമേഷൻ കണ്ട് തീർന്ന ശേഷം) മൊബൈലിലേക്ക് സിഗ്നൽ നൽകുന്നു
+                setTimeout(() => {
+                    db.ref('mobile_reveal').set(true);
+                }, 2000);
+
+            }, 2500); // "Launching..." കാണിക്കുന്ന സമയം (2.5 സെക്കൻഡ്)
         }
     });
 
-    // 2. ആരെങ്കിലും ടാപ്പ് ചെയ്യുമ്പോൾ പുതിയ രണ്ട് വരിയുള്ള ബാഡ്ജ് കാണിക്കുന്നു
     db.ref('recent_scratch').on('value', (snapshot) => {
         const data = snapshot.val();
-        if(data && data.name) {
+        if(data && data.name && !launchStarted) {
             createFloatingBadge(data.name);
         }
     });
@@ -130,23 +163,14 @@
     function createFloatingBadge(name) {
         const badge = document.createElement('div');
         badge.className = 'badge';
-        
-        // പേര് മുകളിലും മെസ്സേജ് താഴെയുമായി സെറ്റ് ചെയ്യുന്നു
         badge.innerHTML = `
             <div class="badge-name">${name}</div>
             <div class="badge-msg">Joined the Launch! 🚀</div>
         `;
-        
-        // സ്ക്രീനിന്റെ പല ഭാഗത്തായി വരാൻ റാൻഡം എക്സ് പൊസിഷൻ
-        const randomX = Math.floor(Math.random() * 65) + 5; // 5% മുതൽ 70% വരെ
+        const randomX = Math.floor(Math.random() * 65) + 5;
         badge.style.left = randomX + '%';
-        
         document.body.appendChild(badge);
-
-        // 3.5 സെക്കന്റിന് ശേഷം ബാഡ്ജ് ഡിലീറ്റ് ആകും
-        setTimeout(() => {
-            badge.remove();
-        }, 3500);
+        setTimeout(() => { badge.remove(); }, 3500);
     }
 </script>
 </body>

@@ -94,16 +94,16 @@
         db.ref('recent_scratch').set({ name: pName, time: Date.now() });
     }
 
-    function listenToTotalStatus() {
-        db.ref('click_count').on('value', (snapshot) => {
-            const clicks = snapshot.val() || 0;
-            if(clicks >= 200) {
-                document.getElementById('scratch-section').style.display = 'none';
-                document.getElementById('result-section').style.display = 'block';
-            }
-        });
-    }
-
+function listenToTotalStatus() {
+    // 200 ക്ലിക്ക് ആയോ എന്ന് നോക്കുന്നതിന് പകരം ടിവിയിൽ നിന്ന് സിഗ്നൽ വരുന്നുണ്ടോ എന്ന് നോക്കുന്നു
+    db.ref('mobile_reveal').on('value', (snapshot) => {
+        const isReady = snapshot.val();
+        if(isReady === true) {
+            document.getElementById('scratch-section').style.display = 'none';
+            document.getElementById('result-section').style.display = 'block';
+        }
+    });
+}
     // വാട്സാപ്പിലേക്ക് ഫോട്ടോ നേരിട്ട് ഷെയർ ചെയ്യാനുള്ള അഡ്വാൻസ്ഡ് ഫങ്ക്ഷൻ
     async function sharePoster() {
         try {
