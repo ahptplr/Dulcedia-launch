@@ -31,7 +31,8 @@
         .progress-bar { 
             height: 100%; width: 0%; 
             background: linear-gradient(90deg, #ec4899, #3b82f6); 
-            transition: width 0.4s ease; border-radius: 20px;
+            transition: width 0.1s linear; /* സ്മൂത്ത് ആയി കൂടാൻ സമയം കുറച്ചു */
+            border-radius: 20px;
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
         }
         .percentage-text { font-size: 32px; color: #38bdf8; font-weight: bold; margin-top: 15px; transition: all 0.3s; }
@@ -56,7 +57,7 @@
         
         #launch-screen { display: block; }
         
-        /* 🎬 പുതിയ ഫുൾ സ്ക്രീൻ റിസൾട്ട് ലേഔട്ട് */
+        /* സിനിമാറ്റിക് ഫുൾ സ്ക്രീൻ റിസൾട്ട് ലേഔട്ട് */
         #result-screen { 
             display: none; 
             position: fixed; 
@@ -73,14 +74,14 @@
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: url('poster-tv.jpg') center center / cover no-repeat;
-            filter: blur(30px) brightness(0.35); /* ബാക്ക്ഗ്രൗണ്ട് ഇരുണ്ട് നിൽക്കാൻ */
+            filter: blur(30px) brightness(0.35); 
             transform: scale(1.1); 
             z-index: 1;
         }
         
-        /* മധ്യത്തിൽ തെളിഞ്ഞു വരുന്ന പ്രധാന പോസ്റ്റർ */
+        /* പ്രധാന പോസ്റ്റർ */
         .poster-tv { 
-            height: 96vh; /* മുകളറ്റം മുതൽ താഴെയറ്റം വരെ പരമാവധി വലിപ്പത്തിൽ */
+            height: 96vh; 
             max-width: 95vw; 
             object-fit: contain;
             position: relative;
@@ -121,7 +122,7 @@
     <div class="progress-container">
         <div class="progress-bar" id="bar"></div>
     </div>
-    <div class="percentage-text" id="percentage-label">Preparing for Launch... 0%</div>
+    <div class="percentage-text" id="percentage-label">Preparing for Launch... 0.0% (0/500 Taps)</div>
 </div>
 
 <div id="result-screen">
@@ -134,7 +135,8 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const targetClicks = 200;
+    // 💥 ക്ലിക്ക് ടാർഗെറ്റ് 500 ആക്കി മാറ്റി
+    const targetClicks = 500;
     let launchStarted = false;
 
     db.ref('mobile_reveal').set(false);
@@ -143,11 +145,14 @@
         if(launchStarted) return;
 
         const clicks = snapshot.val() || 0;
-        let percentage = Math.floor((clicks / targetClicks) * 100);
-        if(percentage > 100) percentage = 100;
+        
+        // 💥 ശതമാനം പോയിന്റോട് കൂടി കണക്കാക്കുന്നു (.toFixed(1) ഉപയോഗിച്ച്)
+        let percentage = ((clicks / targetClicks) * 100).toFixed(1);
+        if(parseFloat(percentage) > 100) percentage = "100.0";
 
         document.getElementById('bar').style.width = percentage + '%';
-        document.getElementById('percentage-label').innerText = `Preparing for Launch... ${percentage}%`;
+        // സ്ക്രീനിൽ ശതമാനവും ഒപ്പം നിലവിലെ ക്ലിക്കുകളും കാണിക്കുന്നു
+        document.getElementById('percentage-label').innerText = `Preparing for Launch... ${percentage}% (${clicks}/${targetClicks} Taps)`;
 
         if(clicks >= targetClicks) {
             launchStarted = true;
@@ -159,7 +164,6 @@
             setTimeout(() => {
                 document.getElementById('flash').style.animation = 'flashEffect 0.8s ease-out';
                 
-                // സ്ക്രീൻ മാറ്റുന്നു (Flexbox ആക്കി മാറ്റിയത് നടുവിൽ വരാൻ സഹായിക്കും)
                 document.getElementById('launch-screen').style.display = 'none';
                 document.getElementById('result-screen').style.display = 'flex';
 
