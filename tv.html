@@ -35,18 +35,40 @@
         }
         .percentage-text { font-size: 32px; color: #38bdf8; font-weight: bold; margin-top: 15px; }
 
-        /* തത്സമയ പോപ്പപ്പ് ബാഡ്ജ് സ്റ്റൈൽ */
+        /* രണ്ട് വരികളുള്ള പുതിയ പോപ്പപ്പ് ബാഡ്ജ് സ്റ്റൈൽ */
         .badge {
-            position: absolute; padding: 15px 30px; border-radius: 40px;
+            position: absolute; 
+            padding: 15px 35px; 
+            border-radius: 25px; /* രണ്ട് വരികൾക്ക് അനുയോജ്യമായ ബോക്സ് ഷേപ്പ് */
             background: linear-gradient(135deg, #f97316, #ea580c);
-            color: white; font-size: 28px; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-            animation: floatUp 3.5s forwards ease-out; opacity: 0; pointer-events: none;
-            display: flex; align-items: center; gap: 12px; border: 2px solid rgba(255,255,255,0.2);
-            white-space: nowrap;
+            color: white; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            animation: floatUp 3.5s forwards ease-out; 
+            opacity: 0; 
+            pointer-events: none;
+            border: 2px solid rgba(255,255,255,0.2);
+            text-align: center;
+            min-width: 250px;
         }
+        /* ആദ്യ വരിയിലെ പേര് (വലുതും ബോൾഡും) */
+        .badge-name {
+            font-size: 34px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 4px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        /* രണ്ടാമത്തെ വരിയിലെ മെസ്സേജ് (ചെറിയ അക്ഷരത്തിൽ മഞ്ഞ നിറത്തിൽ) */
+        .badge-msg {
+            font-size: 22px;
+            font-weight: 600;
+            color: #fef08a; /* ആകർഷകമായ ലൈറ്റ് ഗോൾഡ്/മഞ്ഞ ഷേഡ് */
+            letter-spacing: 0.5px;
+        }
+
         @keyframes floatUp {
             0% { transform: translateY(100vh) scale(0.6); opacity: 0; }
-            10% { opacity: 1; transform: translateY(80vh) scale(1); }
+            10% { opacity: 1; transform: translateY(75vh) scale(1); }
             90% { opacity: 1; }
             100% { transform: translateY(-20vh) scale(0.8); opacity: 0; }
         }
@@ -81,24 +103,23 @@
 
     const targetClicks = 200;
 
-    // 1. ക്ലിക്ക് കൗണ്ട് അനുസരിച്ച് ശതമാനവും പ്രോഗ്രസ് ബാറും മാറ്റുന്നു
+    // 1. പ്രോഗ്രസ് ബാറും ശതമാനവും മാത്രം കാണിക്കുന്നു (ടാപ്സിന്റെ എണ്ണം ഒഴിവാക്കി)
     db.ref('click_count').on('value', (snapshot) => {
         const clicks = snapshot.val() || 0;
         let percentage = Math.floor((clicks / targetClicks) * 100);
         if(percentage > 100) percentage = 100;
 
-        // പ്രോഗ്രസ് ബാറും ശതമാനവും അപ്ഡേറ്റ് ചെയ്യുന്നു
         document.getElementById('bar').style.width = percentage + '%';
-        document.getElementById('percentage-label').innerText = `Preparing for Launch... ${percentage}% (${clicks}/${targetClicks} Taps)`;
+        document.getElementById('percentage-label').innerText = `Preparing for Launch... ${percentage}%`;
 
-        // 100% ആയാൽ പോസ്റ്റർ സ്ക്രീൻ കാണിക്കും
+        // 100% ആയാൽ പോസ്റ്റർ സ്ക്രീൻ ലോഡ് ചെയ്യും
         if(clicks >= targetClicks) {
             document.getElementById('launch-screen').style.display = 'none';
             document.getElementById('result-screen').style.display = 'block';
         }
     });
 
-    // 2. ആരെങ്കിലും ടാപ്പ് ചെയ്യുമ്പോൾ മുകളിലേക്ക് പോകുന്ന പോപ്പപ്പ് കാണിക്കുന്നു
+    // 2. ആരെങ്കിലും ടാപ്പ് ചെയ്യുമ്പോൾ പുതിയ രണ്ട് വരിയുള്ള ബാഡ്ജ് കാണിക്കുന്നു
     db.ref('recent_scratch').on('value', (snapshot) => {
         const data = snapshot.val();
         if(data && data.name) {
@@ -109,15 +130,20 @@
     function createFloatingBadge(name) {
         const badge = document.createElement('div');
         badge.className = 'badge';
-        badge.innerHTML = `📢 I ❤️ Dulcedia ${name}`;
         
-        // സ്ക്രീനിന്റെ പല ഭാഗത്തായി വരാൻ റാൻഡം എക്സ് പൊസിഷൻ നൽകുന്നു
-        const randomX = Math.floor(Math.random() * 70) + 5; // 5% മുതൽ 75% വരെ
+        // പേര് മുകളിലും മെസ്സേജ് താഴെയുമായി സെറ്റ് ചെയ്യുന്നു
+        badge.innerHTML = `
+            <div class="badge-name">${name}</div>
+            <div class="badge-msg">Joined the Launch! 🚀</div>
+        `;
+        
+        // സ്ക്രീനിന്റെ പല ഭാഗത്തായി വരാൻ റാൻഡം എക്സ് പൊസിഷൻ
+        const randomX = Math.floor(Math.random() * 65) + 5; // 5% മുതൽ 70% വരെ
         badge.style.left = randomX + '%';
         
         document.body.appendChild(badge);
 
-        // 3.5 സെക്കന്റിന് ശേഷം ഈ പോപ്പപ്പ് സ്ക്രീനിൽ നിന്നും തനിയെ ഡിലീറ്റ് ആകും (കുന്നുകൂടില്ല)
+        // 3.5 സെക്കന്റിന് ശേഷം ബാഡ്ജ് ഡിലീറ്റ് ആകും
         setTimeout(() => {
             badge.remove();
         }, 3500);
