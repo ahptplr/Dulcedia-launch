@@ -55,25 +55,49 @@
         }
         
         #launch-screen { display: block; }
-        #result-screen { display: none; }
         
-        /* 💥 സ്ക്രീൻ പൊട്ടി വരുന്ന പോസ്റ്റർ ആനിമേഷൻ (Burst/Pop Intro) */
+        /* 🎬 പുതിയ ഫുൾ സ്ക്രീൻ റിസൾട്ട് ലേഔട്ട് */
+        #result-screen { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100vw; height: 100vh; 
+            z-index: 99; 
+            overflow: hidden; 
+            justify-content: center; 
+            align-items: center; 
+        }
+        
+        /* പശ്ചാത്തലത്തിലെ ബ്ലർ എഫക്ട് */
+        .poster-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('poster-tv.jpg') center center / cover no-repeat;
+            filter: blur(30px) brightness(0.35); /* ബാക്ക്ഗ്രൗണ്ട് ഇരുണ്ട് നിൽക്കാൻ */
+            transform: scale(1.1); 
+            z-index: 1;
+        }
+        
+        /* മധ്യത്തിൽ തെളിഞ്ഞു വരുന്ന പ്രധാന പോസ്റ്റർ */
         .poster-tv { 
-            max-height: 95vh; 
-            max-width: 100%; 
-            border-radius: 15px; 
-            box-shadow: 0 0 60px rgba(59, 130, 246, 0.6);
+            height: 96vh; /* മുകളറ്റം മുതൽ താഴെയറ്റം വരെ പരമാവധി വലിപ്പത്തിൽ */
+            max-width: 95vw; 
+            object-fit: contain;
+            position: relative;
+            z-index: 2;
+            border-radius: 12px; 
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
             animation: burstIn 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
         
         @keyframes burstIn {
             0% { transform: scale(0.2); opacity: 0; filter: brightness(3) blur(10px); }
-            45% { transform: scale(1.1); opacity: 1; filter: brightness(1.8) blur(2px); }
-            70% { transform: scale(0.97); filter: brightness(1.2); }
+            45% { transform: scale(1.06); opacity: 1; filter: brightness(1.6) blur(2px); }
+            70% { transform: scale(0.98); filter: brightness(1.1); }
             100% { transform: scale(1); opacity: 1; filter: brightness(1); }
         }
 
-        /* സ്ക്രീൻ മാറുമ്പോൾ ഉണ്ടാകുന്ന വൈറ്റ് ഫ്ലാഷ് എഫക്ട് */
+        /* വൈറ്റ് ഫ്ലാഷ് */
         .flash-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: white; z-index: 100; opacity: 0; pointer-events: none;
@@ -89,7 +113,6 @@
 </head>
 <body>
 
-<!-- വൈറ്റ് ഫ്ലാഷ് ലെയർ -->
 <div class="flash-overlay" id="flash"></div>
 
 <div class="container" id="launch-screen">
@@ -101,7 +124,8 @@
     <div class="percentage-text" id="percentage-label">Preparing for Launch... 0%</div>
 </div>
 
-<div class="container" id="result-screen">
+<div id="result-screen">
+    <div class="poster-bg"></div>
     <img src="poster-tv.jpg" class="poster-tv" alt="Official Launch Poster">
 </div>
 
@@ -111,13 +135,12 @@
     const db = firebase.database();
 
     const targetClicks = 200;
-    let launchStarted = false; // രണ്ട് തവണ ട്രിഗർ ആകാതിരിക്കാൻ
+    let launchStarted = false;
 
-    // പേജ് ലോഡ് ചെയ്യുമ്പോൾ പഴയ റീവീൽ സ്റ്റാറ്റസ് ഉണ്ടെങ്കിൽ അത് കളയുന്നു (Reset)
     db.ref('mobile_reveal').set(false);
 
     db.ref('click_count').on('value', (snapshot) => {
-        if(launchStarted) return; // ലോഞ്ചിങ് പ്രോസസ്സ് തുടങ്ങിയാൽ പിന്നെ ഈ കോഡ് വർക്ക് ചെയ്യില്ല
+        if(launchStarted) return;
 
         const clicks = snapshot.val() || 0;
         let percentage = Math.floor((clicks / targetClicks) * 100);
@@ -126,30 +149,25 @@
         document.getElementById('bar').style.width = percentage + '%';
         document.getElementById('percentage-label').innerText = `Preparing for Launch... ${percentage}%`;
 
-        // 100% ആകുമ്പോൾ ഉള്ള മാസ്സ് എൻട്രി ലോജിക്
         if(clicks >= targetClicks) {
             launchStarted = true;
             
-            // 1. ഉടനെ പോസ്റ്റർ കാണിക്കാതെ ടെക്സ്റ്റ് മാറ്റുന്നു
             document.getElementById('percentage-label').innerText = `Launching... 🚀`;
             document.getElementById('percentage-label').style.color = '#f43f5e';
             document.getElementById('percentage-label').style.fontSize = '40px';
 
-            // 2. കൃത്യം 2.5 സെക്കൻഡിന് ശേഷം ടിവിയിൽ വലിയ ആനിമേഷനോടെ പോസ്റ്റർ വരുന്നു
             setTimeout(() => {
-                // വൈറ്റ് ഫ്ലാഷ് എഫക്ട് നൽകുന്നു
                 document.getElementById('flash').style.animation = 'flashEffect 0.8s ease-out';
                 
-                // സ്ക്രീൻ മാറ്റുന്നു
+                // സ്ക്രീൻ മാറ്റുന്നു (Flexbox ആക്കി മാറ്റിയത് നടുവിൽ വരാൻ സഹായിക്കും)
                 document.getElementById('launch-screen').style.display = 'none';
-                document.getElementById('result-screen').style.display = 'block';
+                document.getElementById('result-screen').style.display = 'flex';
 
-                // 3. ടിവിയിൽ പോസ്റ്റർ വന്ന് 2 സെക്കൻഡ് കഴിഞ്ഞ് (ടിവിയിലെ ആനിമേഷൻ കണ്ട് തീർന്ന ശേഷം) മൊബൈലിലേക്ക് സിഗ്നൽ നൽകുന്നു
                 setTimeout(() => {
                     db.ref('mobile_reveal').set(true);
                 }, 2000);
 
-            }, 2500); // "Launching..." കാണിക്കുന്ന സമയം (2.5 സെക്കൻഡ്)
+            }, 2500);
         }
     });
 
