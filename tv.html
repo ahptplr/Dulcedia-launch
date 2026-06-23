@@ -83,7 +83,7 @@
         let percent = Math.floor((clicks / 200) * 100);
         
         document.getElementById('bar').style.width = percent + '%';
-        document.getElementById('percent-text').innerText = percent + '% Launched';
+        document.getElementById('percentage-text').innerText = `Preparing for Launch... ${percentage}%`;
         
         // 100% ആകുമ്പോൾ ട്രാൻസിഷൻ വരുന്നു
         if(percent >= 100 && !isLaunched) {
