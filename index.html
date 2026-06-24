@@ -97,7 +97,6 @@
             box-shadow: 0 0 15px rgba(236, 72, 153, 0.6);
         }
 
-        /* 📊 ടാപ്പ് കീക്ക് താഴെ ശതമാനം മാത്രം */
         #mobile-percentage-label {
             font-size: 24px;
             color: #38bdf8;
@@ -110,7 +109,6 @@
             display: none;
         }
         
-        /* 📉 പോസ്റ്ററിന്റെ സൈസ് കുറച്ചു */
         .poster-mobile {
             width: 65%;
             max-width: 240px;
@@ -119,7 +117,6 @@
             margin-bottom: 20px;
         }
 
-        /* 💾 സേവ് ബട്ടൺ സ്റ്റൈൽ */
         .download-btn {
             background: #3b82f6;
             color: white;
@@ -167,7 +164,6 @@
 
 <div class="container">
     
-    <!-- 1️⃣ ടാപ്പിങ് സെക്ഷൻ -->
     <div id="scratch-section">
         <h1 class="title">Ready for Proclamation!</h1>
         <p class="subtitle">Tap and Step into the World of Dulce Dia</p>
@@ -179,24 +175,21 @@
 
         <button class="tap-btn" onclick="handleTap()">TAP HERE</button>
 
-        <!-- കൗണ്ട് ഒഴിവാക്കി ശതമാനം മാത്രം കാണിക്കുന്നു -->
         <div id="mobile-percentage-label">0.0%</div>
     </div>
 
-    <!-- 2️⃣ റിസീൽ സെക്ഷൻ -->
     <div id="reveal-screen">
         <h1 class="title" style="font-size: 24px;">Proclamation Revealed! 🎉</h1>
         <p class="subtitle">Official Poster is now live on the Big Screen.</p>
         
         <img src="poster-mobile.jpg" class="poster-mobile" alt="Dulce Dia Poster">
         
-        <!-- 💾 പോസ്റ്റർ സേവ് ചെയ്യാനുള്ള പുതിയ ബട്ടൺ -->
         <a href="poster-mobile.jpg" download="Dulce_Dia_Poster.jpg" class="download-btn">
-            📥 Save Poster to Phone
+            📥 Save Poster
         </a>
 
-        <button class="share-btn" onclick="shareOnWhatsApp()">
-            Share Text on WhatsApp
+        <button class="share-btn" onclick="sharePosterOnWhatsApp()">
+            Share Poster on WhatsApp
         </button>
     </div>
 
@@ -210,26 +203,18 @@
 
     const targetClicks = 500;
 
-    // 🎵 മൊബൈലിൽ ടാപ്പ് ചെയ്യുമ്പോൾ കൃത്യമായി പ്ലേ ആകുന്ന ഇൻസ്റ്റന്റ് സൗണ്ട്
+    // 🎵 മൊബൈലിലെ ക്ലിക്ക് സൗണ്ടിനായി നിങ്ങളുടെ click.mp3 ഫയൽ ലോഡ് ചെയ്യുന്നു
+    const clickSound = new Audio('click.mp3');
+
     function playTapSound() {
         try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(600, audioCtx.currentTime); 
-            osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.08);
-            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.08);
+            clickSound.currentTime = 0; 
+            clickSound.play().catch(e => console.log("Audio waiting for user interaction", e));
         } catch(e) { console.log("Audio error", e); }
     }
 
     function handleTap() {
-        playTapSound(); // സൗണ്ട് പ്ലേ ചെയ്യുന്നു
+        playTapSound(); // ഓരോ ക്ലിക്കിലും സൗണ്ട് പ്ലേ ചെയ്യും
         
         let nameInput = document.getElementById('user-name').value.trim();
         if(nameInput === "") { nameInput = "Someone"; }
@@ -263,7 +248,8 @@
         }
     });
 
-    function shareOnWhatsApp() {
+    // 🖼️ പോസ്റ്ററും ടെക്സ്റ്റും ഒന്നിച്ച് ഷെയർ ചെയ്യാനുള്ള ഫങ്ഷൻ
+    async function sharePosterOnWhatsApp() {
         const shareText = `✨ DULCE DIA: Mining the Minds ✨
 
 📣 Unearthing potential, shaping perspectives, and celebrating brilliance…
@@ -276,6 +262,29 @@ The stage is set for a grand exploration of talent, intellect, and creativity. G
 
 *SIDRA ACADEMY*`;
 
+        // ഫോണുകളിൽ ഇമേജും ടെക്സ്റ്റും ഒന്നിച്ച് ഷെയർ ചെയ്യാൻ Web Share API ഉപയോഗിക്കുന്നു
+        if (navigator.share && navigator.canShare) {
+            try {
+                // പോസ്റ്റർ ഫയൽ എടുക്കുന്നു
+                const response = await fetch('poster-mobile.jpg');
+                const blob = await response.blob();
+                const file = new File([blob], 'poster-mobile.jpg', { type: blob.type });
+
+                // ഒന്നിച്ച് ഷെയർ ചെയ്യാൻ സാധിക്കുമെങ്കിൽ ഫോണിന്റെ ഷെയർ ഷീറ്റ് തുറക്കും (അതിൽ നിന്ന് വാട്സാപ്പ് തിരഞ്ഞെടുക്കാം)
+                if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        text: shareText,
+                        title: 'Dulce Dia 2026'
+                    });
+                    return; 
+                }
+            } catch (error) {
+                console.log('Web Share failed, falling back to text share:', error);
+            }
+        }
+
+        // ബ്രൗസർ സപ്പോർട്ട് ചെയ്തില്ലെങ്കിൽ പഴയതുപോലെ ടെക്സ്റ്റ് മാത്രമായി വാട്സാപ്പിലേക്ക് പോകും
         const whatsappUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(shareText);
         window.open(whatsappUrl, '_blank');
     }
