@@ -18,58 +18,18 @@
             text-align: center;
             position: relative;
         }
-        .container { width: 90%; max-width: 900px; position: relative; z-index: 10; }
-        .subtitle { color: #f59e0b; letter-spacing: 3px; font-weight: bold; font-size: 24px; margin-bottom: 10px; }
-        .title { font-size: 72px; font-weight: 800; margin: 0 0 40px 0; letter-spacing: 2px; }
-        
-        /* പ്രോഗ്രസ് ബാർ */
-        .progress-container { 
-            width: 100%; height: 35px; background: rgba(51, 65, 85, 0.5); 
-            border-radius: 20px; overflow: hidden; margin-bottom: 25px;
-            border: 2px solid #334155; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
-        }
-        .progress-bar { 
-            height: 100%; width: 0%; 
-            background: linear-gradient(90deg, #ec4899, #3b82f6); 
-            transition: width 0.1s linear; /* സ്മൂത്ത് ആയി കൂടാൻ സമയം കുറച്ചു */
-            border-radius: 20px;
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
-        }
-        .percentage-text { font-size: 32px; color: #38bdf8; font-weight: bold; margin-top: 15px; transition: all 0.3s; }
 
-        /* ബാഡ്ജ് സ്റ്റൈൽ */
-        .badge {
-            position: absolute; padding: 15px 35px; border-radius: 25px;
-            background: linear-gradient(135deg, #f97316, #ea580c); color: white; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5); animation: floatUp 3.5s forwards ease-out; 
-            opacity: 0; pointer-events: none; border: 2px solid rgba(255,255,255,0.2);
-            text-align: center; min-width: 250px;
-        }
-        .badge-name { font-size: 34px; font-weight: 800; color: #ffffff; margin-bottom: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        .badge-msg { font-size: 22px; font-weight: 600; color: #fef08a; letter-spacing: 0.5px; }
-
-        @keyframes floatUp {
-            0% { transform: translateY(100vh) scale(0.6); opacity: 0; }
-            10% { opacity: 1; transform: translateY(75vh) scale(1); }
-            90% { opacity: 1; }
-            100% { transform: translateY(-20vh) scale(0.8); opacity: 0; }
-        }
-        
-        #launch-screen { display: block; }
-        
-        /* സിനിമാറ്റിക് ഫുൾ സ്ക്രീൻ റിസൾട്ട് ലേഔട്ട് */
+        /* 🎬 ഫുൾ സ്ക്രീൻ പോസ്റ്റർ ലെയർ */
         #result-screen { 
-            display: none; 
+            display: flex; 
             position: fixed; 
             top: 0; left: 0; 
             width: 100vw; height: 100vh; 
-            z-index: 99; 
+            z-index: 1; 
             overflow: hidden; 
             justify-content: center; 
             align-items: center; 
         }
-        
-        /* പശ്ചാത്തലത്തിലെ ബ്ലർ എഫക്ട് */
         .poster-bg {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -78,8 +38,6 @@
             transform: scale(1.1); 
             z-index: 1;
         }
-        
-        /* പ്രധാന പോസ്റ്റർ */
         .poster-tv { 
             height: 96vh; 
             max-width: 95vw; 
@@ -90,23 +48,77 @@
             box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
             animation: burstIn 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
+
+        /* 🚪 സ്പ്ലിറ്റ് ഡോർ പശ്ചാത്തല ലെയർ */
+        #curtain-container {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10;
+            display: flex; overflow: hidden; pointer-events: none;
+        }
+        .curtain-half {
+            position: absolute; top: 0; width: 50vw; height: 100vh; background: #0f172a;
+            transition: transform 1.8s cubic-bezier(0.77, 0, 0.175, 1); z-index: 10;
+        }
+        .curtain-half.left { left: 0; border-right: 1px solid #1e293b; }
+        .curtain-half.right { right: 0; border-left: 1px solid #1e293b; }
+        
+        .curtain-half.left.split { transform: translateX(-100%); }
+        .curtain-half.right.split { transform: translateX(100%); }
+
+        /* ലോഞ്ചിങ് കണ്ടെന്റുകൾ */
+        .container { 
+            width: 90%; max-width: 900px; position: relative; z-index: 20; 
+            transition: opacity 0.8s ease;
+        }
+        .container.fade-out { opacity: 0; }
+
+        .subtitle { color: #f59e0b; letter-spacing: 3px; font-weight: bold; font-size: 24px; margin-bottom: 10px; }
+        .title { font-size: 72px; font-weight: 800; margin: 0 0 20px 0; letter-spacing: 2px; }
+        .instruction-text { color: #a7f3d0; font-size: 24px; font-weight: 500; margin-bottom: 25px; font-style: italic; letter-spacing: 1px;}
+
+        /* പ്രോഗ്രസ് ബാർ */
+        .progress-container { 
+            width: 100%; height: 35px; background: rgba(51, 65, 85, 0.5); 
+            border-radius: 20px; overflow: hidden; margin-bottom: 25px;
+            border: 2px solid #334155; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .progress-bar { 
+            height: 100%; width: 0%; 
+            background: linear-gradient(90deg, #ec4899, #3b82f6); 
+            transition: width 0.1s linear; border-radius: 20px;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+        }
+        .percentage-text { font-size: 32px; color: #38bdf8; font-weight: bold; margin-top: 15px; }
+
+        /* പേര് ബാഡ്ജുകൾ */
+        .badge {
+            position: absolute; padding: 15px 35px; border-radius: 25px;
+            background: linear-gradient(135deg, #f97316, #ea580c); color: white; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
+            animation: floatUp 4s forwards ease-in-out; 
+            opacity: 0; pointer-events: none; border: 2px solid rgba(255,255,255,0.2);
+            text-align: center; min-width: 250px; z-index: 30;
+        }
+        .badge-name { font-size: 34px; font-weight: 800; color: #ffffff; margin-bottom: 4px; }
+        .badge-msg { font-size: 22px; font-weight: 600; color: #fef08a; }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.7); opacity: 0; }
+            15% { opacity: 1; transform: translateY(70vh) scale(1); }
+            60% { opacity: 0.9; }
+            100% { transform: translateY(5vh) scale(0.7); opacity: 0; }
+        }
         
         @keyframes burstIn {
             0% { transform: scale(0.2); opacity: 0; filter: brightness(3) blur(10px); }
-            45% { transform: scale(1.06); opacity: 1; filter: brightness(1.6) blur(2px); }
-            70% { transform: scale(0.98); filter: brightness(1.1); }
             100% { transform: scale(1); opacity: 1; filter: brightness(1); }
         }
 
-        /* വൈറ്റ് ഫ്ലാഷ് */
         .flash-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: white; z-index: 100; opacity: 0; pointer-events: none;
         }
         @keyframes flashEffect {
-            0% { opacity: 0; }
-            20% { opacity: 1; }
-            100% { opacity: 0; }
+            0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; }
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -116,18 +128,27 @@
 
 <div class="flash-overlay" id="flash"></div>
 
+<!-- ബാക്ക്ഗ്രൗണ്ടിലുള്ള പോസ്റ്റർ ലെയർ -->
+<div id="result-screen">
+    <div class="poster-bg"></div>
+    <img src="poster-tv.jpg" class="poster-tv" alt="Official Proclamation Poster">
+</div>
+
+<!-- 🚪 സ്പ്ലിറ്റ് ലെയറുകൾ -->
+<div id="curtain-container">
+    <div class="curtain-half left" id="curtain-left"></div>
+    <div class="curtain-half right" id="curtain-right"></div>
+</div>
+
+<!-- മുൻവശത്തെ ലോഡിങ് കണ്ടെന്റുകൾ -->
 <div class="container" id="launch-screen">
     <div class="subtitle">SIDRA ACADEMY</div>
     <div class="title">DULCE DIA 2026</div>
+    <div class="instruction-text">Tap and Step into the World of Dulce Dia</div>
     <div class="progress-container">
         <div class="progress-bar" id="bar"></div>
     </div>
-    <div class="percentage-text" id="percentage-label">Preparing for Launch... 0.0% (0/500 Taps)</div>
-</div>
-
-<div id="result-screen">
-    <div class="poster-bg"></div>
-    <img src="poster-tv.jpg" class="poster-tv" alt="Official Launch Poster">
+    <div class="percentage-text" id="percentage-label">Preparing for Proclamation... 0.0% (0/500 Taps)</div>
 </div>
 
 <script>
@@ -135,9 +156,19 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 💥 ക്ലിക്ക് ടാർഗെറ്റ് 500 ആക്കി മാറ്റി
     const targetClicks = 500;
     let launchStarted = false;
+    let lastMilestone = 0; 
+
+    // 💥 പുതിയ മാറ്റം: നിങ്ങളുടെ 'tv-click.mp3' ഫയൽ ലോഡ് ചെയ്യുന്നു
+    const clickSound = new Audio('tv-click.mp3');
+
+    function playClickSound() {
+        try {
+            clickSound.currentTime = 0; // തുടക്കം മുതൽ പ്ലേ ചെയ്യാൻ
+            clickSound.play().catch(e => console.log("Audio blocked by browser", e));
+        } catch(e) { console.log("Audio error", e); }
+    }
 
     db.ref('mobile_reveal').set(false);
 
@@ -145,27 +176,32 @@
         if(launchStarted) return;
 
         const clicks = snapshot.val() || 0;
-        
-        // 💥 ശതമാനം പോയിന്റോട് കൂടി കണക്കാക്കുന്നു (.toFixed(1) ഉപയോഗിച്ച്)
         let percentage = ((clicks / targetClicks) * 100).toFixed(1);
         if(parseFloat(percentage) > 100) percentage = "100.0";
 
         document.getElementById('bar').style.width = percentage + '%';
-        // സ്ക്രീനിൽ ശതമാനവും ഒപ്പം നിലവിലെ ക്ലിക്കുകളും കാണിക്കുന്നു
-        document.getElementById('percentage-label').innerText = `Preparing for Launch... ${percentage}%`;
+        document.getElementById('percentage-label').innerText = `Preparing for Proclamation... ${percentage}% (${clicks}/${targetClicks} Taps)`;
+
+        // 🎵 ഓരോ 10% കഴിയുമ്പോഴും tv-click.mp3 പ്ലേ ചെയ്യുന്നു
+        let currentMilestone = Math.floor(parseFloat(percentage) / 10);
+        if(currentMilestone > lastMilestone && currentMilestone <= 10) {
+            playClickSound();
+            lastMilestone = currentMilestone;
+        }
 
         if(clicks >= targetClicks) {
             launchStarted = true;
             
-            document.getElementById('percentage-label').innerText = `Launching... 🚀`;
+            document.getElementById('percentage-label').innerText = `Proclaiming... 🚀`;
             document.getElementById('percentage-label').style.color = '#f43f5e';
-            document.getElementById('percentage-label').style.fontSize = '40px';
 
             setTimeout(() => {
-                document.getElementById('flash').style.animation = 'flashEffect 0.8s ease-out';
+                document.getElementById('launch-screen').classList.add('fade-out');
                 
-                document.getElementById('launch-screen').style.display = 'none';
-                document.getElementById('result-screen').style.display = 'flex';
+                document.getElementById('curtain-left').classList.add('split');
+                document.getElementById('curtain-right').classList.add('split');
+                
+                document.getElementById('flash').style.animation = 'flashEffect 0.8s ease-out';
 
                 setTimeout(() => {
                     db.ref('mobile_reveal').set(true);
@@ -187,12 +223,16 @@
         badge.className = 'badge';
         badge.innerHTML = `
             <div class="badge-name">${name}</div>
-            <div class="badge-msg">Joined the Launch! 🚀</div>
+            <div class="badge-msg">Joined Proclamation! 🚀</div>
         `;
-        const randomX = Math.floor(Math.random() * 65) + 5;
+        const randomX = Math.floor(Math.random() * 70) + 5;
+        const randomDuration = (Math.random() * 1.5 + 3.5).toFixed(1); 
+        
         badge.style.left = randomX + '%';
+        badge.style.animationDuration = randomDuration + 's';
+        
         document.body.appendChild(badge);
-        setTimeout(() => { badge.remove(); }, 3500);
+        setTimeout(() => { badge.remove(); }, randomDuration * 1000);
     }
 </script>
 </body>
